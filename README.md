@@ -178,7 +178,9 @@ list_cards          → should return card list (empty if no cards yet)
 | `get_wallet_recharge_addresses` | Get on-chain USDC deposit addresses |
 | `list_cards` | List virtual cards created by this agent |
 | `get_card_balance` | Get card balance and status |
-| `get_card_details` | Get card details including encrypted PAN/CVV |
+| `batch_card_balances` | Check balances for multiple cards in one call |
+| `update_card` | Update card risk controls (tx_limit, allowed_mcc, blocked_mcc) |
+| `get_card_details` | Get card details including risk controls, cardholder info, and encrypted PAN/CVV |
 | `decrypt_card_data` | Decrypt PAN/CVV from get_card_details |
 | `list_transactions` | List card transactions with optional filters |
 

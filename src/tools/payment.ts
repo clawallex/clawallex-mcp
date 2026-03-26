@@ -38,6 +38,9 @@ export function registerPaymentTools(server: McpServer, client: ClawallexClient)
       amount: z.number().describe("Card face amount in USD"),
       description: z.string().describe("What this payment is for"),
       mode_code: z.number().int().describe("100=wallet (default), 200=x402 on-chain").optional(),
+      tx_limit: z.string().describe("Per-transaction limit in USD (optional, default 100.0000)").optional(),
+      allowed_mcc: z.string().describe("MCC whitelist, comma-separated (optional, e.g. '5734,5815')").optional(),
+      blocked_mcc: z.string().describe("MCC blacklist, comma-separated (optional, e.g. '7995')").optional(),
       client_request_id: z.string().max(64).describe("UUID idempotency key (<=64 chars). Mode B Stage 2: MUST reuse from Stage 1.").optional(),
       chain_code: z.string().describe("Chain code for Mode B Stage 1 (e.g. 'ETH')").optional(),
       token_code: z.string().describe("Token code for Mode B Stage 1 (e.g. 'USDC')").optional(),
@@ -71,6 +74,9 @@ export function registerPaymentTools(server: McpServer, client: ClawallexClient)
           amount: params.amount.toFixed(4),
           client_request_id: params.client_request_id ?? randomUUID(),
         };
+        if (params.tx_limit) body.tx_limit = params.tx_limit;
+        if (params.allowed_mcc) body.allowed_mcc = params.allowed_mcc;
+        if (params.blocked_mcc) body.blocked_mcc = params.blocked_mcc;
         if (params.chain_code) body.chain_code = params.chain_code;
         if (params.token_code) body.token_code = params.token_code;
         if (params.x402_reference_id !== undefined) body.x402_reference_id = params.x402_reference_id;
@@ -112,6 +118,9 @@ export function registerPaymentTools(server: McpServer, client: ClawallexClient)
       initial_amount: z.number().describe("Initial deposit in USD"),
       description: z.string().describe("Subscription purpose"),
       mode_code: z.number().int().describe("100=wallet (default), 200=x402 on-chain").optional(),
+      tx_limit: z.string().describe("Per-transaction limit in USD (optional, default 100.0000)").optional(),
+      allowed_mcc: z.string().describe("MCC whitelist, comma-separated (optional, e.g. '5734,5815')").optional(),
+      blocked_mcc: z.string().describe("MCC blacklist, comma-separated (optional, e.g. '7995')").optional(),
       client_request_id: z.string().max(64).describe("UUID idempotency key (<=64 chars). Mode B Stage 2: MUST reuse from Stage 1.").optional(),
       chain_code: z.string().describe("Chain code for Mode B Stage 1 (e.g. 'ETH')").optional(),
       token_code: z.string().describe("Token code for Mode B Stage 1 (e.g. 'USDC')").optional(),
@@ -145,6 +154,9 @@ export function registerPaymentTools(server: McpServer, client: ClawallexClient)
           amount: params.initial_amount.toFixed(4),
           client_request_id: params.client_request_id ?? randomUUID(),
         };
+        if (params.tx_limit) body.tx_limit = params.tx_limit;
+        if (params.allowed_mcc) body.allowed_mcc = params.allowed_mcc;
+        if (params.blocked_mcc) body.blocked_mcc = params.blocked_mcc;
         if (params.chain_code) body.chain_code = params.chain_code;
         if (params.token_code) body.token_code = params.token_code;
         if (params.x402_reference_id !== undefined) body.x402_reference_id = params.x402_reference_id;

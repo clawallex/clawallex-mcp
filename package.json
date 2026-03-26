@@ -1,6 +1,6 @@
 {
   "name": "@clawallex/mcp-server",
-  "version": "1.0.6",
+  "version": "1.0.7",
   "description": "MCP Server for Clawallex payment API",
   "type": "module",
   "main": "dist/index.js",

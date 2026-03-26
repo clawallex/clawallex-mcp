@@ -62,6 +62,9 @@ export function registerCardTools(server: McpServer, client: ClawallexClient): v
         .string()
         .describe("Fee amount in USD (optional, must match server-calculated fee if provided)")
         .optional(),
+      tx_limit: z.string().describe("Per-transaction limit in USD (optional, default 100.0000)").optional(),
+      allowed_mcc: z.string().describe("MCC whitelist, comma-separated (optional, e.g. '5734,5815')").optional(),
+      blocked_mcc: z.string().describe("MCC blacklist, comma-separated (optional, e.g. '7995')").optional(),
       chain_code: z.string().describe("Chain code for Mode B Stage 1 (e.g. 'ETH', 'BASE')").optional(),
       token_code: z.string().describe("Token code for Mode B Stage 1 (e.g. 'USDC')").optional(),
       extra: z.record(z.unknown()).describe("Mode B Stage 2: { card_amount, paid_amount }").optional(),
@@ -93,6 +96,9 @@ export function registerCardTools(server: McpServer, client: ClawallexClient): v
           client_request_id: params.client_request_id,
         };
         if (params.fee_amount !== undefined) body.fee_amount = params.fee_amount;
+        if (params.tx_limit) body.tx_limit = params.tx_limit;
+        if (params.allowed_mcc) body.allowed_mcc = params.allowed_mcc;
+        if (params.blocked_mcc) body.blocked_mcc = params.blocked_mcc;
         if (params.chain_code) body.chain_code = params.chain_code;
         if (params.token_code) body.token_code = params.token_code;
         if (params.x402_reference_id !== undefined) body.x402_reference_id = params.x402_reference_id;
@@ -165,10 +171,51 @@ export function registerCardTools(server: McpServer, client: ClawallexClient): v
   );
 
   server.tool(
+    "batch_card_balances",
+    "Check balances for multiple cards in one call.",
+    {
+      card_ids: z.array(z.string()).describe("Array of card IDs"),
+    },
+    async ({ card_ids }) => {
+      try {
+        return toolOk(await client.post<unknown>("/payment/cards/balances", { card_ids }));
+      } catch (err) {
+        return toolError(err);
+      }
+    },
+  );
+
+  server.tool(
+    "update_card",
+    [
+      "Update card risk controls: per-transaction limit and MCC whitelist/blacklist.",
+      "At least one field must be provided. Changes take effect after issuer confirms.",
+    ].join("\n"),
+    {
+      card_id: z.string().describe("Card ID to update"),
+      client_request_id: z.string().max(64).describe("UUID idempotency key"),
+      tx_limit: z.string().describe("Per-transaction limit in USD (e.g. '200.0000')").optional(),
+      allowed_mcc: z.string().describe("MCC whitelist, comma-separated (e.g. '5734,5815')").optional(),
+      blocked_mcc: z.string().describe("MCC blacklist, comma-separated (e.g. '7995')").optional(),
+    },
+    async (params) => {
+      try {
+        const body: Record<string, unknown> = { client_request_id: params.client_request_id };
+        if (params.tx_limit) body.tx_limit = params.tx_limit;
+        if (params.allowed_mcc) body.allowed_mcc = params.allowed_mcc;
+        if (params.blocked_mcc) body.blocked_mcc = params.blocked_mcc;
+        return toolOk(await client.post<unknown>(`/payment/cards/${params.card_id}/update`, body));
+      } catch (err) {
+        return toolError(err);
+      }
+    },
+  );
+
+  server.tool(
     "get_card_details",
     [
-      "Get full card details including masked PAN, expiry, balance, cardholder info, billing address, and encrypted sensitive data.",
-      "Returns: masked_pan, expiry, balance, status, first_name, last_name, delivery_address, encrypted_sensitive_data.",
+      "Get full card details including masked PAN, expiry, balance, cardholder info, billing address, risk controls, and encrypted sensitive data.",
+      "Returns: masked_pan, expiry, balance, status, first_name, last_name, delivery_address, tx_limit, allowed_mcc, blocked_mcc, encrypted_sensitive_data.",
       "The encrypted_sensitive_data field contains PAN and CVV encrypted with AES-256-GCM.",
       "To decrypt, use the decrypt_card_data tool with the encrypted_sensitive_data object.",
       "Only cards created by this agent (same client_id) are accessible.",
