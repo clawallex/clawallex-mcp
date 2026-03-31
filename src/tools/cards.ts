@@ -62,6 +62,7 @@ export function registerCardTools(server: McpServer, client: ClawallexClient): v
         .string()
         .describe("Fee amount in USD (optional, must match server-calculated fee if provided)")
         .optional(),
+      ttl: z.number().int().positive().describe("Card TTL in seconds (flash card_type=100 only, optional). Sets expiry_at = now + ttl. Default: 86400 (24 h).").optional(),
       tx_limit: z.string().describe("Per-transaction limit in USD (optional, default 100.0000)").optional(),
       allowed_mcc: z.string().describe("MCC whitelist, comma-separated (optional, e.g. '5734,5815')").optional(),
       blocked_mcc: z.string().describe("MCC blacklist, comma-separated (optional, e.g. '7995')").optional(),
@@ -96,6 +97,7 @@ export function registerCardTools(server: McpServer, client: ClawallexClient): v
           client_request_id: params.client_request_id,
         };
         if (params.fee_amount !== undefined) body.fee_amount = params.fee_amount;
+        if (params.ttl !== undefined) body.ttl = params.ttl;
         if (params.tx_limit) body.tx_limit = params.tx_limit;
         if (params.allowed_mcc) body.allowed_mcc = params.allowed_mcc;
         if (params.blocked_mcc) body.blocked_mcc = params.blocked_mcc;

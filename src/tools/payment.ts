@@ -42,6 +42,7 @@ export function registerPaymentTools(server: McpServer, client: ClawallexClient)
       allowed_mcc: z.string().describe("MCC whitelist, comma-separated (optional, e.g. '5734,5815')").optional(),
       blocked_mcc: z.string().describe("MCC blacklist, comma-separated (optional, e.g. '7995')").optional(),
       client_request_id: z.string().max(64).describe("UUID idempotency key (<=64 chars). Mode B Stage 2: MUST reuse from Stage 1.").optional(),
+      ttl: z.number().int().positive().describe("Card TTL in seconds (flash only, optional). Sets expiry_at = now + ttl. Default: 86400 (24 h).").optional(),
       chain_code: z.string().describe("Chain code for Mode B Stage 1 (e.g. 'ETH')").optional(),
       token_code: z.string().describe("Token code for Mode B Stage 1 (e.g. 'USDC')").optional(),
       extra: z.record(z.unknown()).describe("Mode B Stage 2 (required): { card_amount, paid_amount }").optional(),
@@ -77,6 +78,7 @@ export function registerPaymentTools(server: McpServer, client: ClawallexClient)
         if (params.tx_limit) body.tx_limit = params.tx_limit;
         if (params.allowed_mcc) body.allowed_mcc = params.allowed_mcc;
         if (params.blocked_mcc) body.blocked_mcc = params.blocked_mcc;
+        if (params.ttl !== undefined) body.ttl = params.ttl;
         if (params.chain_code) body.chain_code = params.chain_code;
         if (params.token_code) body.token_code = params.token_code;
         if (params.x402_reference_id !== undefined) body.x402_reference_id = params.x402_reference_id;
