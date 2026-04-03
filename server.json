@@ -1,0 +1,36 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "io.github.clawallex/clawallex-mcp",
+  "description": "MCP Server for Clawallex payment API - Pay for anything with USDC virtual cards",
+  "repository": {
+    "url": "https://github.com/clawallex/clawallex-mcp",
+    "source": "github"
+  },
+  "version": "1.0.9",
+  "packages": [
+    {
+      "registryType": "npm",
+      "identifier": "@clawallex/mcp-server",
+      "version": "1.0.9",
+      "transport": {
+        "type": "stdio"
+      },
+      "environmentVariables": [
+        {
+          "description": "Clawallex API Key",
+          "isRequired": true,
+          "format": "string",
+          "isSecret": true,
+          "name": "CLAWALLEX_API_KEY"
+        },
+        {
+          "description": "Clawallex API Secret for HMAC-SHA256 signing",
+          "isRequired": true,
+          "format": "string",
+          "isSecret": true,
+          "name": "CLAWALLEX_API_SECRET"
+        }
+      ]
+    }
+  ]
+}
